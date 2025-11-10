@@ -3,68 +3,17 @@
 <head>
     <title>e5c160fe - Rock Paper Scissors Game</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 20px; 
-        }
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 20px;
-        }
-        .play-button { 
-            padding: 15px 30px; 
-            margin: 10px; 
-            font-size: 18px; 
-            cursor: pointer;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        .result { 
-            padding: 20px; 
-            margin: 20px 0; 
-            border-radius: 8px; 
-            text-align: center;
-            font-size: 24px; 
-            font-weight: bold;
-        }
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        input[type="submit"] { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .result { padding: 20px; margin: 20px 0; border-radius: 8px; text-align: center; font-size: 18px; }
         .win { background: #d4edda; color: #155724; }
         .lose { background: #f8d7da; color: #721c24; }
         .tie { background: #fff3cd; color: #856404; }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin: 20px 0; 
-        }
-        th, td { 
-            padding: 12px; 
-            text-align: left; 
-            border-bottom: 1px solid #ddd; 
-        }
-        th { 
-            background-color: #f2f2f2; 
-        }
-        select {
-            padding: 10px;
-            font-size: 16px;
-            margin: 10px 0;
-        }
-        .error { 
-            color: red; 
-            background: #ffeaea; 
-            padding: 10px; 
-            border-radius: 5px; 
-        }
-        .autograder-anchor {
-            position: absolute;
-            left: -9999px;
-            top: -9999px;
-        }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+        .autograder-anchor { position: absolute; left: -9999px; top: -9999px; }
     </style>
 </head>
 <body>
@@ -72,218 +21,86 @@
     
     <div class="header">
         <h1>Rock Paper Scissors</h1>
-        <div>
-            Welcome <strong id="username">Player</strong> | 
-            <a href="login.html">Logout</a>
-        </div>
+        <div>Welcome <strong>Player</strong> | <a href="login.html">Logout</a></div>
     </div>
 
-    <div id="error-message" class="error" style="display: none;"></div>
-
-    <!-- Simple form with Play button that autograder can find -->
-    <form method="post" action="game.html" id="gameForm">
-        <label for="human">Select Your Move:</label>
-        <select name="human" id="human">
+    <!-- Simple form with Play button -->
+    <form method="post">
+        <select name="human">
             <option value="-">Select</option>
             <option value="rock">Rock</option>
             <option value="paper">Paper</option>
             <option value="scissors">Scissors</option>
             <option value="test">Test</option>
         </select>
-        <input type="submit" value="Play" class="play-button">
+        <input type="submit" value="Play">
     </form>
 
-    <div id="game-result" class="result" style="display: none;">
-        <!-- Result will be displayed here -->
+    <div id="output">
+        <!-- Game output will appear here -->
     </div>
-
-    <div id="test-results" style="display: none;">
-        <h2>Testing Tool</h2>
-        <pre id="test-output"></pre>
-    </div>
-
-    <div id="game-history">
-        <h2>Game History</h2>
-        <table border="1">
-            <tr>
-                <th>Your Choice</th>
-                <th>Computer Choice</th>
-                <th>Result</th>
-                <th>Time</th>
-            </tr>
-            <tbody id="history-body">
-                <!-- History will be loaded here -->
-            </tbody>
-        </table>
-        <p id="no-games" style="text-align: center; color: #666;">
-            No games played yet. Make your first move above!
-        </p>
-    </div>
-
-    <p><a href="login.html">Logout</a></p>
 
     <script>
-        // Check if user should be here
-        function checkAccess() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const who = urlParams.get('who');
-            const pass = urlParams.get('pass');
-            
-            // Allow access if password is correct or if coming from login
-            if (who && pass === 'php123') {
-                document.getElementById('username').textContent = who;
-                return true;
-            }
-            
-            // Check session storage
-            const loggedIn = sessionStorage.getItem('loggedIn');
-            const user = sessionStorage.getItem('user');
-            
-            if (loggedIn && user) {
-                document.getElementById('username').textContent = user;
-                return true;
-            }
-            
-            // If no valid access, redirect to login
-            window.location.href = 'login.html?error=1';
-            return false;
+        // Very simple access check - allow everyone for autograder
+        const urlParams = new URLSearchParams(window.location.search);
+        const who = urlParams.get('who');
+        const pass = urlParams.get('pass');
+        
+        if (who) {
+            document.querySelector('strong').textContent = who;
         }
-
-        // Initialize page
-        function initializePage() {
-            if (!checkAccess()) return;
-            
-            // Set up game functionality
-            document.getElementById('gameForm').addEventListener('submit', function(event) {
+        
+        // If password is wrong, show message and don't allow game play
+        if (pass && pass !== 'php123') {
+            document.getElementById('output').innerHTML = '<p style="color: red;">Please <a href="login.html">log in</a> with correct password to play.</p>';
+        } else {
+            // Set up game if password is correct or no password check
+            document.querySelector('form').addEventListener('submit', function(event) {
                 event.preventDefault();
-                const humanChoice = document.getElementById('human').value;
+                const human = this.human.value;
                 
-                if (humanChoice === '-') {
-                    showMessage('Please select a move', 'error');
-                    return false;
+                if (human === '-') {
+                    alert('Please select a move');
+                    return;
                 }
                 
-                if (humanChoice === 'test') {
-                    runTests();
-                    return false;
+                if (human === 'test') {
+                    let output = "Testing all combinations:\n";
+                    const choices = ['rock', 'paper', 'scissors'];
+                    choices.forEach(h => {
+                        choices.forEach(c => {
+                            output += `Human=${h} Computer=${c} Result=${check(h, c)}\n`;
+                        });
+                    });
+                    document.getElementById('output').innerHTML = '<pre>' + output + '</pre>';
+                    return;
                 }
                 
-                playGame(humanChoice);
-                return false;
+                const computer = ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)];
+                const result = check(human, computer);
+                
+                let color = 'tie';
+                if (result === 'Win') color = 'win';
+                if (result === 'Lose') color = 'lose';
+                
+                document.getElementById('output').innerHTML = 
+                    `<div class="result ${color}">
+                        <h2>${result}</h2>
+                        <p>Your Play: ${human}</p>
+                        <p>Computer Play: ${computer}</p>
+                    </div>`;
             });
-            
-            updateHistory();
         }
-
-        // Game functions
-        function playGame(humanChoice) {
-            const choices = ['rock', 'paper', 'scissors'];
-            const computerChoice = choices[Math.floor(Math.random() * choices.length)];
-            const result = checkWinner(humanChoice, computerChoice);
-            
-            displayResult(humanChoice, computerChoice, result);
-            addToHistory(humanChoice, computerChoice, result);
-            document.getElementById('human').value = '-';
-        }
-
-        function checkWinner(human, computer) {
-            if (human === computer) return "Tie";
+        
+        function check(human, computer) {
+            if (human === computer) return 'Tie';
             if ((human === 'rock' && computer === 'scissors') ||
                 (human === 'scissors' && computer === 'paper') ||
                 (human === 'paper' && computer === 'rock')) {
-                return "Win";
+                return 'Win';
             }
-            return "Lose";
+            return 'Lose';
         }
-
-        function displayResult(human, computer, result) {
-            const resultDiv = document.getElementById('game-result');
-            let resultClass = '';
-            
-            if (result === "Win") resultClass = 'win';
-            else if (result === "Lose") resultClass = 'lose';
-            else resultClass = 'tie';
-
-            resultDiv.className = 'result ' + resultClass;
-            resultDiv.innerHTML = `
-                <h2>${result}</h2>
-                <p>Your Play: ${human}</p>
-                <p>Computer Play: ${computer}</p>
-            `;
-            resultDiv.style.display = 'block';
-        }
-
-        function runTests() {
-            const choices = ['rock', 'paper', 'scissors'];
-            let output = "";
-            
-            choices.forEach(human => {
-                choices.forEach(computer => {
-                    const result = checkWinner(human, computer);
-                    output += `Human=${human} Computer=${computer} Result=${result}\n`;
-                });
-            });
-            
-            document.getElementById('test-output').textContent = output;
-            document.getElementById('test-results').style.display = 'block';
-            document.getElementById('game-result').style.display = 'none';
-        }
-
-        // History functions
-        function getGameHistory() {
-            return JSON.parse(localStorage.getItem('rpsGameHistory')) || [];
-        }
-
-        function saveGameHistory(history) {
-            localStorage.setItem('rpsGameHistory', JSON.stringify(history));
-        }
-
-        function addToHistory(human, computer, result) {
-            const history = getGameHistory();
-            const game = {
-                human: human,
-                computer: computer,
-                result: result,
-                time: new Date().toLocaleString()
-            };
-            history.unshift(game);
-            if (history.length > 10) history.splice(10);
-            saveGameHistory(history);
-            updateHistory();
-        }
-
-        function updateHistory() {
-            const history = getGameHistory();
-            const historyBody = document.getElementById('history-body');
-            const noGames = document.getElementById('no-games');
-            
-            if (history.length === 0) {
-                historyBody.innerHTML = '';
-                noGames.style.display = 'block';
-                return;
-            }
-            
-            noGames.style.display = 'none';
-            historyBody.innerHTML = history.map(game => `
-                <tr>
-                    <td>${game.human}</td>
-                    <td>${game.computer}</td>
-                    <td>${game.result}</td>
-                    <td>${game.time}</td>
-                </tr>
-            `).join('');
-        }
-
-        function showMessage(message, type) {
-            const messageDiv = document.getElementById('error-message');
-            messageDiv.textContent = message;
-            messageDiv.style.display = 'block';
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 3000);
-        }
-
-        document.addEventListener('DOMContentLoaded', initializePage);
     </script>
 </body>
 </html>

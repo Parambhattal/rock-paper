@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>e5c160fe - Rock Paper Scissors</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+        }
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px;
+        }
+        .choice-btn { 
+            padding: 20px 40px; 
+            margin: 10px; 
+            font-size: 20px; 
+            cursor: pointer;
+            border: 2px solid #007bff; 
+            background: white; 
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .choice-btn:hover { 
+            background: #007bff; 
+            color: white; 
+            transform: scale(1.05);
+        }
+        .result { 
+            padding: 30px; 
+            margin: 20px 0; 
+            border-radius: 10px; 
+            text-align: center;
+            font-size: 24px; 
+            font-weight: bold;
+            display: none;
+        }
+        .win { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 2px solid #c3e6cb;
+        }
+        .lose { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 2px solid #f5c6cb;
+        }
+        .tie { 
+            background: #fff3cd; 
+            color: #856404; 
+            border: 2px solid #ffeaa7;
+        }
+        .history { 
+            margin-top: 30px; 
+            padding: 20px; 
+            background: #f8f9fa; 
+            border-radius: 8px;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 20px 0; 
+        }
+        th, td { 
+            padding: 12px; 
+            text-align: left; 
+            border-bottom: 1px solid #ddd; 
+        }
+        th { 
+            background-color: #e9ecef; 
+        }
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 8px;
+        }
+        .stat-box {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Rock Paper Scissors</h1>
+            <div>
+                Welcome, <strong id="username">Player</strong> | 
+                <a href="login.html" class="logout-btn">Logout</a>
+            </div>
+        </div>
+
+        <div id="error-message" style="color: red; display: none;"></div>
+        <div id="success-message" style="color: green; display: none;"></div>
+
+        <div id="game-result" class="result">
+            <!-- Result will be displayed here -->
+        </div>
+
+        <h2>Make Your Move</h2>
+        <div style="text-align: center;">
+            <button onclick="playGame('rock')" class="choice-btn">✊ Rock</button>
+            <button onclick="playGame('paper')" class="choice-btn">✋ Paper</button>
+            <button onclick="playGame('scissors')" class="choice-btn">✌️ Scissors</button>
+        </div>
+
+        <div class="game-stats">
+            <div class="stat-box">
+                <div class="stat-number" id="games-played">0</div>
+                <div>Games Played</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="wins">0</div>
+                <div>Wins</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="losses">0</div>
+                <div>Losses</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="ties">0</div>
+                <div>Ties</div>
+            </div>
+        </div>
+
+        <div class="history">
+            <h2>Game History</h2>
+            <table id="game-history">
+                <thead>
+                    <tr>
+                        <th>Your Choice</th>
+                        <th>Computer Choice</th>
+                        <th>Result</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                    <!-- History rows will be added here -->
+                </tbody>
+            </table>
+            <p id="no-games" style="text-align: center; color: #666;">
+                No games played yet. Make your first move above!
+            </p>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="testAllCombinations()" style="padding: 10px 20px; margin: 5px;">
+                Test All Combinations
+            </button>
+            <button onclick="clearHistory()" style="padding: 10px 20px; margin: 5px; background: #6c757d; color: white; border: none; border-radius: 5px;">
+                Clear History
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game data stored in localStorage
+        let gameData = JSON.parse(localStorage.getItem('rpsGameData')) || {
+            gamesPlayed: 0,
+            wins: 0,
+            losses: 0,
+            ties: 0,
+            history: []
+        };
+
+        // Available choices
+        const choices = ['rock', 'paper', 'scissors'];
+
+        // Initialize the page
+        function initializePage() {
+            updateStats();
+            updateHistory();
+            
+            // Check if user is "logged in"
+            const urlParams = new URLSearchParams(window.location.search);
+            const user = urlParams.get('user');
+            if (user) {
+                document.getElementById('username').textContent = decodeURIComponent(user);
+            }
+        }
+
+        // Main game function
+        function playGame(humanChoice) {
+            const computerChoice = choices[Math.floor(Math.random() * choices.length)];
+            const result = checkWinner(humanChoice, computerChoice);
+
+            // Update game data
+            gameData.gamesPlayed++;
+            if (result === 'You Win!') gameData.wins++;
+            else if (result === 'You Lose!') gameData.losses++;
+            else gameData.ties++;
+
+            // Add to history
+            const gameRecord = {
+                human: humanChoice,
+                computer: computerChoice,
+                result: result,
+                timestamp: new Date().toLocaleString()
+            };
+            gameData.history.unshift(gameRecord);
+            
+            // Keep only last 10 games
+            if (gameData.history.length > 10) {
+                gameData.history = gameData.history.slice(0, 10);
+            }
+
+            // Save to localStorage
+            localStorage.setItem('rpsGameData', JSON.stringify(gameData));
+
+            // Display result
+            displayResult(humanChoice, computerChoice, result);
+            updateStats();
+            updateHistory();
+        }
+
+        // Check who wins
+        function checkWinner(human, computer) {
+            if (human === computer) return 'Tie';
+            if (
+                (human === 'rock' && computer === 'scissors') ||
+                (human === 'scissors' && computer === 'paper') ||
+                (human === 'paper' && computer === 'rock')
+            ) {
+                return 'You Win!';
+            }
+            return 'You Lose!';
+        }
+
+        // Display game result
+        function displayResult(human, computer, result) {
+            const resultDiv = document.getElementById('game-result');
+            let resultClass = '';
+            
+            if (result === 'You Win!') resultClass = 'win';
+            else if (result === 'You Lose!') resultClass = 'lose';
+            else resultClass = 'tie';
+
+            resultDiv.className = 'result ' + resultClass;
+            resultDiv.innerHTML = `
+                <h2>${result}</h2>
+                <p>You played: <strong>${human}</strong></p>
+                <p>Computer played: <strong>${computer}</strong></p>
+            `;
+            resultDiv.style.display = 'block';
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('games-played').textContent = gameData.gamesPlayed;
+            document.getElementById('wins').textContent = gameData.wins;
+            document.getElementById('losses').textContent = gameData.losses;
+            document.getElementById('ties').textContent = gameData.ties;
+        }
+
+        // Update game history table
+        function updateHistory() {
+            const historyBody = document.getElementById('history-body');
+            const noGames = document.getElementById('no-games');
+            
+            if (gameData.history.length === 0) {
+                historyBody.innerHTML = '';
+                noGames.style.display = 'block';
+                return;
+            }
+            
+            noGames.style.display = 'none';
+            historyBody.innerHTML = gameData.history.map(game => `
+                <tr>
+                    <td>${game.human}</td>
+                    <td>${game.computer}</td>
+                    <td><strong>${game.result}</strong></td>
+                    <td>${game.timestamp}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Test all combinations
+        function testAllCombinations() {
+            let testResults = "Testing All Combinations:\n\n";
+            choices.forEach(human => {
+                choices.forEach(computer => {
+                    const result = checkWinner(human, computer);
+                    testResults += `Human=${human} Computer=${computer} Result=${result}\n`;
+                });
+            });
+            alert(testResults);
+        }
+
+        // Clear game history
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all game history?')) {
+                gameData = {
+                    gamesPlayed: 0,
+                    wins: 0,
+                    losses: 0,
+                    ties: 0,
+                    history: []
+                };
+                localStorage.setItem('rpsGameData', JSON.stringify(gameData));
+                updateStats();
+                updateHistory();
+                document.getElementById('game-result').style.display = 'none';
+                showMessage('Game history cleared!', 'success');
+            }
+        }
+
+        // Show temporary message
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById(type === 'error' ? 'error-message' : 'success-message');
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>

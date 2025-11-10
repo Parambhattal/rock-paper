@@ -8,179 +8,84 @@
             max-width: 500px; 
             margin: 50px auto; 
             padding: 20px; 
-            background: #f5f5f5;
         }
         .container { 
-            background: white; 
+            background: #f9f9f9; 
             padding: 30px; 
             border-radius: 10px; 
-            box-shadow: 0 0 10px rgba(0,0,0,0.1); 
         }
-        .tabs { 
-            display: flex; 
-            margin-bottom: 20px; 
-        }
-        .tab { 
-            flex: 1; 
-            padding: 15px; 
-            text-align: center; 
-            cursor: pointer; 
-            border: 1px solid #ccc; 
-            background: #eee; 
-        }
-        .tab.active { 
-            background: #007bff; 
-            color: white; 
-        }
-        .form { 
-            display: none; 
-        }
-        .form.active { 
-            display: block; 
-        }
-        input[type="text"], input[type="password"], input[type="email"] { 
+        input[type="text"], input[type="password"] { 
             width: 100%; 
-            padding: 12px; 
-            margin: 8px 0; 
+            padding: 8px; 
+            margin: 5px 0; 
             box-sizing: border-box; 
-            border: 1px solid #ddd;
-            border-radius: 5px;
         }
         input[type="submit"] { 
-            background: #007bff; 
-            color: white; 
-            padding: 12px 20px; 
-            border: none; 
-            cursor: pointer; 
-            width: 100%; 
+            padding: 10px 20px; 
             margin-top: 10px;
-            border-radius: 5px;
-            font-size: 16px;
         }
         .error { 
             color: red; 
-            background: #ffeaea; 
-            padding: 10px; 
-            border-radius: 5px; 
-            margin-bottom: 15px;
         }
         .success { 
             color: green; 
-            background: #eaffea; 
-            padding: 10px; 
-            border-radius: 5px; 
-            margin-bottom: 15px;
-        }
-        .test-info { 
-            background: #fff3cd; 
-            padding: 10px; 
-            border-radius: 5px; 
-            margin-top: 15px; 
-            font-size: 14px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Rock Paper Scissors</h1>
-
-        <div class="tabs">
-            <div class="tab active" onclick="showTab('login')">Login</div>
-            <div class="tab" onclick="showTab('register')">Register</div>
+        <h1>Please Log In</h1>
+        
+        <div id="message">
+            <!-- Messages will appear here -->
         </div>
 
-        <div id="login-form" class="form active">
-            <h2>Login to Play</h2>
-            <form onsubmit="return handleLogin(event)">
-                <input type="email" name="email" placeholder="Email Address" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <input type="submit" value="Log In">
-            </form>
-            <div class="test-info">
-                <strong>Demo Login (any credentials work):</strong><br>
-                Email: any@email.com<br>
-                Password: anything
-            </div>
-            <div style="text-align: center; margin-top: 20px;">
-                <button onclick="quickLogin()" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                    Quick Demo Login
-                </button>
-            </div>
-        </div>
-
-        <div id="register-form" class="form">
-            <h2>Create Account</h2>
-            <form onsubmit="return handleRegister(event)">
-                <input type="text" name="name" placeholder="Your Name" required>
-                <input type="email" name="email" placeholder="Email Address" required>
-                <input type="password" name="password" placeholder="Create Password" required>
-                <input type="submit" value="Register">
-            </form>
-        </div>
-
-        <div id="message"></div>
+        <form method="post" onsubmit="return handleLogin(event)">
+            <label for="email">Email</label>
+            <input type="text" name="email" id="email"><br/>
+            <label for="pass">Password</label>
+            <input type="password" name="pass" id="pass"><br/>
+            <input type="submit" value="Log In">
+        </form>
+        
+        <p>For a password hint, view source and find a password hint in the HTML comments.</p>
+        <!-- Hint: The password is the three character name of the programming language used in this class (all lower case) followed by 123. -->
     </div>
 
     <script>
-        function showTab(tabName) {
-            // Update tabs
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.form').forEach(form => form.classList.remove('active'));
-            
-            // Show selected tab
-            event.target.classList.add('active');
-            document.getElementById(tabName + '-form').classList.add('active');
-        }
-
         function showMessage(message, type) {
             const messageDiv = document.getElementById('message');
             messageDiv.className = type;
-            messageDiv.textContent = message;
-            messageDiv.style.display = 'block';
+            messageDiv.innerHTML = `<p style="color: ${type === 'error' ? 'red' : 'green'};">${message}</p>`;
         }
 
         function handleLogin(event) {
             event.preventDefault();
-            const formData = new FormData(event.target);
-            const email = formData.get('email');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('pass').value;
             
-            // For demo purposes, any login works
-            showMessage('Login successful! Redirecting...', 'success');
-            setTimeout(() => {
-                window.location.href = `index.html?user=${encodeURIComponent(email.split('@')[0])}`;
-            }, 1000);
+            if (!email || !password) {
+                showMessage('Email and password are required', 'error');
+                return false;
+            }
+            
+            // For demo purposes, accept any login but check for the specific password hint
+            if (password === 'php123') {
+                showMessage('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'game.php?user=' + encodeURIComponent(email);
+                }, 1000);
+            } else {
+                showMessage('Incorrect password. Hint: Check the HTML comments.', 'error');
+            }
+            
             return false;
         }
 
-        function handleRegister(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const name = formData.get('name');
-            const email = formData.get('email');
-            
-            // For demo purposes, any registration works
-            showMessage('Registration successful! Redirecting...', 'success');
-            setTimeout(() => {
-                window.location.href = `index.html?user=${encodeURIComponent(name)}`;
-            }, 1000);
-            return false;
-        }
-
-        function quickLogin() {
-            showMessage('Quick login successful! Redirecting...', 'success');
-            setTimeout(() => {
-                window.location.href = 'index.html?user=DemoPlayer';
-            }, 500);
-        }
-
-        // Check if user is already "logged in" via URL parameter
+        // Check for URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('logout')) {
-            showMessage('You have been logged out successfully.', 'success');
+        if (urlParams.get('error')) {
+            showMessage('Please log in first', 'error');
         }
     </script>
 </body>

@@ -120,6 +120,18 @@
     <p><a href="login.html">Logout</a></p>
 
     <script>
+        // Check if user came from login
+        const urlParams = new URLSearchParams(window.location.search);
+        const who = urlParams.get('who');
+        const pass = urlParams.get('pass');
+        
+        if (who) {
+            document.getElementById('username').textContent = who;
+        } else {
+            // If no user parameter, redirect to login
+            window.location.href = 'login.html?error=1';
+        }
+
         // Simple game functionality
         document.querySelector('form').addEventListener('submit', function(event) {
             event.preventDefault();

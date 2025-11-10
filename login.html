@@ -49,7 +49,7 @@
             <!-- Messages will appear here -->
         </div>
 
-        <form method="post" action="game.php">
+        <form method="get" action="game.html">
             <label for="who">User Name</label>
             <input type="text" name="who" id="who"><br/>
             <label for="pass">Password</label>
@@ -62,7 +62,7 @@
     </div>
 
     <script>
-        // Simple client-side validation that doesn't interfere with form submission
+        // Handle form submission to show appropriate messages
         document.querySelector('form').addEventListener('submit', function(event) {
             const who = document.getElementById('who').value;
             const pass = document.getElementById('pass').value;
@@ -73,8 +73,15 @@
                 return false;
             }
             
-            // For demo purposes, we'll let the form submit normally
-            // The autograder will handle the actual authentication
+            // Check password and show appropriate message
+            if (pass !== 'php123') {
+                event.preventDefault();
+                showMessage('Incorrect password', 'error');
+                return false;
+            }
+            
+            // If password is correct, allow form submission
+            showMessage('Logged in successfully', 'success');
             return true;
         });
 

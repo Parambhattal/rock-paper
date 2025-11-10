@@ -70,19 +70,19 @@
     
     <div class="header">
         <h1>Rock Paper Scissors</h1>
-        <div id="user-info">
-            <!-- User info will be loaded here -->
+        <div>
+            Welcome <strong id="username">Player</strong> | 
+            <a href="login.html">Logout</a>
         </div>
     </div>
 
     <div id="error-message" class="error" style="display: none;"></div>
-    <div id="success-message" style="color: green; display: none;"></div>
 
     <div id="game-result" class="result" style="display: none;">
         <!-- Result will be displayed here -->
     </div>
 
-    <form method="post" onsubmit="return handleGameSubmit(event)">
+    <form method="post">
         <label for="human">Select Your Move:</label>
         <select name="human" id="human">
             <option value="-">Select</option>
@@ -120,39 +120,8 @@
     <p><a href="login.html">Logout</a></p>
 
     <script>
-        // Check if user is logged in
-        function checkLogin() {
-            const user = sessionStorage.getItem('user');
-            if (!user) {
-                window.location.href = 'login.html?error=1';
-                return null;
-            }
-            return user;
-        }
-
-        // Initialize page
-        function initializePage() {
-            const user = checkLogin();
-            if (user) {
-                document.getElementById('user-info').innerHTML = 
-                    `Welcome ${user} | <a href="login.html">Logout</a>`;
-            }
-            updateHistory();
-        }
-
-        // Game logic
-        function checkWinner(human, computer) {
-            if (human === computer) return "Tie";
-            if ((human === 'rock' && computer === 'scissors') ||
-                (human === 'scissors' && computer === 'paper') ||
-                (human === 'paper' && computer === 'rock')) {
-                return "Win";
-            }
-            return "Lose";
-        }
-
-        // Handle form submission
-        function handleGameSubmit(event) {
+        // Simple game functionality
+        document.querySelector('form').addEventListener('submit', function(event) {
             event.preventDefault();
             const humanChoice = document.getElementById('human').value;
             
@@ -168,25 +137,28 @@
             
             playGame(humanChoice);
             return false;
-        }
+        });
 
-        // Play the game
         function playGame(humanChoice) {
             const choices = ['rock', 'paper', 'scissors'];
             const computerChoice = choices[Math.floor(Math.random() * choices.length)];
             const result = checkWinner(humanChoice, computerChoice);
             
-            // Display result
             displayResult(humanChoice, computerChoice, result);
-            
-            // Save to history
             addToHistory(humanChoice, computerChoice, result);
-            
-            // Reset selection
             document.getElementById('human').value = '-';
         }
 
-        // Display game result
+        function checkWinner(human, computer) {
+            if (human === computer) return "Tie";
+            if ((human === 'rock' && computer === 'scissors') ||
+                (human === 'scissors' && computer === 'paper') ||
+                (human === 'paper' && computer === 'rock')) {
+                return "Win";
+            }
+            return "Lose";
+        }
+
         function displayResult(human, computer, result) {
             const resultDiv = document.getElementById('game-result');
             let resultClass = '';
@@ -204,7 +176,6 @@
             resultDiv.style.display = 'block';
         }
 
-        // Run test mode
         function runTests() {
             const choices = ['rock', 'paper', 'scissors'];
             let output = "";
@@ -221,7 +192,6 @@
             document.getElementById('game-result').style.display = 'none';
         }
 
-        // Game history functions
         function getGameHistory() {
             return JSON.parse(localStorage.getItem('rpsGameHistory')) || [];
         }
@@ -239,10 +209,7 @@
                 time: new Date().toLocaleString()
             };
             history.unshift(game);
-            // Keep only last 10 games
-            if (history.length > 10) {
-                history.splice(10);
-            }
+            if (history.length > 10) history.splice(10);
             saveGameHistory(history);
             updateHistory();
         }
@@ -270,7 +237,7 @@
         }
 
         function showMessage(message, type) {
-            const messageDiv = document.getElementById(type === 'error' ? 'error-message' : 'success-message');
+            const messageDiv = document.getElementById('error-message');
             messageDiv.textContent = message;
             messageDiv.style.display = 'block';
             setTimeout(() => {
@@ -278,8 +245,8 @@
             }, 3000);
         }
 
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', initializePage);
+        // Initialize
+        updateHistory();
     </script>
 </body>
 </html>

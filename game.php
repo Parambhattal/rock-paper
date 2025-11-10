@@ -15,18 +15,11 @@
             align-items: center; 
             margin-bottom: 20px;
         }
-        .choice-btn { 
+        input[type="submit"] { 
             padding: 15px 30px; 
             margin: 10px; 
             font-size: 18px; 
             cursor: pointer;
-            border: 2px solid #007bff; 
-            background: white; 
-            border-radius: 5px;
-        }
-        .choice-btn:hover { 
-            background: #007bff; 
-            color: white; 
         }
         .result { 
             padding: 20px; 
@@ -89,7 +82,7 @@
         <!-- Result will be displayed here -->
     </div>
 
-    <form onsubmit="return handleGameSubmit(event)">
+    <form method="post" onsubmit="return handleGameSubmit(event)">
         <label for="human">Select Your Move:</label>
         <select name="human" id="human">
             <option value="-">Select</option>

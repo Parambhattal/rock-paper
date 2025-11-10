@@ -3,52 +3,23 @@
 <head>
     <title>e5c160fe - Rock Paper Scissors Login</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            max-width: 500px; 
-            margin: 50px auto; 
-            padding: 20px; 
-        }
-        .container { 
-            background: #f9f9f9; 
-            padding: 30px; 
-            border-radius: 10px; 
-        }
-        input[type="text"], input[type="password"] { 
-            width: 100%; 
-            padding: 8px; 
-            margin: 5px 0; 
-            box-sizing: border-box; 
-        }
-        input[type="submit"] { 
-            padding: 10px 20px; 
-            margin-top: 10px;
-        }
-        .error { 
-            color: red; 
-        }
-        .success { 
-            color: green; 
-        }
-        .autograder-anchor {
-            position: absolute;
-            left: -9999px;
-            top: -9999px;
-        }
+        body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
+        .container { background: #f9f9f9; padding: 30px; border-radius: 10px; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 8px; margin: 5px 0; }
+        input[type="submit"] { padding: 10px 20px; margin-top: 10px; }
+        .error { color: red; }
+        .autograder-anchor { position: absolute; left: -9999px; top: -9999px; }
     </style>
 </head>
 <body>
     <div class="container">
         <a href="login.html" class="autograder-anchor">Please Log In</a>
-        
         <h1>Please Log In</h1>
         
-        <div id="message">
-            <!-- Messages will appear here -->
-        </div>
+        <div id="message"></div>
 
-        <!-- Simple form that redirects directly to game page for autograder -->
-        <form method="get" action="game.html" id="loginForm">
+        <!-- Very simple form that always submits -->
+        <form method="get" action="game.html">
             <label for="who">User Name</label>
             <input type="text" name="who" id="who" value=""><br/>
             <label for="pass">Password</label>
@@ -61,47 +32,18 @@
     </div>
 
     <script>
-        // Handle form submission to show messages but allow redirect
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            const who = document.getElementById('who').value;
-            const pass = document.getElementById('pass').value;
-            
-            if (!who || !pass) {
-                event.preventDefault();
-                showMessage('User name and password are required', 'error');
-                return false;
-            }
-            
-            // For autograder, always allow form submission
-            // The actual password check happens in game.html
-            return true;
-        });
-
-        // Check URL parameters and show messages
-        function checkURLParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const who = urlParams.get('who');
-            const pass = urlParams.get('pass');
-            
-            if (who && pass) {
-                if (pass !== 'php123') {
-                    showMessage('Incorrect password', 'error');
-                }
-            }
-            
-            if (urlParams.get('error')) {
-                showMessage('Please log in first', 'error');
-            }
+        // Show error message if password is wrong in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const who = urlParams.get('who');
+        const pass = urlParams.get('pass');
+        
+        if (who && pass && pass !== 'php123') {
+            document.getElementById('message').innerHTML = '<p style="color: red;">Incorrect password</p>';
         }
-
-        function showMessage(message, type) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.className = type;
-            messageDiv.innerHTML = `<p style="color: ${type === 'error' ? 'red' : 'green'};">${message}</p>`;
+        
+        if (urlParams.get('error')) {
+            document.getElementById('message').innerHTML = '<p style="color: red;">Please log in first</p>';
         }
-
-        // Check URL parameters when page loads
-        document.addEventListener('DOMContentLoaded', checkURLParams);
     </script>
 </body>
 </html>

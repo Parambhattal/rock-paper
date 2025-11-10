@@ -49,11 +49,11 @@
             <!-- Messages will appear here -->
         </div>
 
-        <form method="get" action="game.html">
+        <form method="post" action="game.html" id="loginForm">
             <label for="who">User Name</label>
-            <input type="text" name="who" id="who"><br/>
+            <input type="text" name="who" id="who" value=""><br/>
             <label for="pass">Password</label>
-            <input type="password" name="pass" id="pass"><br/>
+            <input type="password" name="pass" id="pass" value=""><br/>
             <input type="submit" value="Log In">
         </form>
         
@@ -62,8 +62,8 @@
     </div>
 
     <script>
-        // Handle form submission to show appropriate messages
-        document.querySelector('form').addEventListener('submit', function(event) {
+        // Handle form submission
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
             const who = document.getElementById('who').value;
             const pass = document.getElementById('pass').value;
             
@@ -73,7 +73,7 @@
                 return false;
             }
             
-            // Check password and show appropriate message
+            // Check password
             if (pass !== 'php123') {
                 event.preventDefault();
                 showMessage('Incorrect password', 'error');
@@ -81,7 +81,9 @@
             }
             
             // If password is correct, allow form submission
-            showMessage('Logged in successfully', 'success');
+            // Store login state in sessionStorage for game.html
+            sessionStorage.setItem('loggedIn', 'true');
+            sessionStorage.setItem('user', who);
             return true;
         });
 

@@ -21,7 +21,7 @@
     
     <div class="header">
         <h1>Rock Paper Scissors</h1>
-        <div>Welcome <strong>Player</strong> | <a href="login.html">Logout</a></div>
+        <div id="user-info">Welcome <strong>Guest</strong> | <a href="login.html">Logout</a></div>
     </div>
 
     <!-- Simple form with Play button -->
@@ -41,20 +41,19 @@
     </div>
 
     <script>
-        // Very simple access check - allow everyone for autograder
+        // Check if user has proper credentials
         const urlParams = new URLSearchParams(window.location.search);
         const who = urlParams.get('who');
         const pass = urlParams.get('pass');
         
-        if (who) {
-            document.querySelector('strong').textContent = who;
-        }
-        
-        // If password is wrong, show message and don't allow game play
-        if (pass && pass !== 'php123') {
-            document.getElementById('output').innerHTML = '<p style="color: red;">Please <a href="login.html">log in</a> with correct password to play.</p>';
+        if (!who || !pass || pass !== 'php123') {
+            // Redirect back to login if not properly authenticated
+            window.location.href = 'login.html?error=1';
         } else {
-            // Set up game if password is correct or no password check
+            // User is properly authenticated, show game
+            document.querySelector('strong').textContent = who;
+            
+            // Set up game functionality
             document.querySelector('form').addEventListener('submit', function(event) {
                 event.preventDefault();
                 const human = this.human.value;
